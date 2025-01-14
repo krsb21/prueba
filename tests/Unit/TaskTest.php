@@ -13,7 +13,9 @@ class TaskTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    /** @test 
+     * 1. Que un usuario puede crear una tarea correctamente.
+    */
     public function a_user_can_create_a_task()
     {
         $user = User::factory()->create();
@@ -31,6 +33,26 @@ class TaskTest extends TestCase
 
         $response->assertStatus(201);
         $this->assertDatabaseHas('tasks', ['title' => 'Nueva Tarea']);
+    }
+
+    /** @test 
+     * 2. Que no se puede crear una tarea con datos inválidos.
+    */
+    public function a_user_cant_create_with_invalid_data()
+    {
+        $user = User::factory()->create();
+
+        $taskData = [
+            'title' => '',
+            'description' => 'Descripción de la tarea',
+            'status' => 'pending',
+            'user_id' => $user->id,
+        ];
+
+        $response = $this->withHeaders([
+            'Authorization' => '1234567890',
+        ])->postJson('/api/tasks', $taskData);
+        $response->assertStatus(422);
     }
 
     /** @test */
@@ -59,7 +81,9 @@ class TaskTest extends TestCase
         ]);
     }
 
-    /** @test */
+    /** @test 
+     * 3. Que una tarea puede ser eliminada correctamente.
+    */
     public function a_task_can_be_deleted()
     {
         $user = User::factory()->create();
@@ -71,7 +95,7 @@ class TaskTest extends TestCase
         ])->deleteJson("/api/tasks/{$task->id}");
         $response->assertStatus(204);
         $this->assertDatabaseMissing('tasks', [
-            'id' => $task->id,
+            'id' => $task->id
         ]);
     }
 
